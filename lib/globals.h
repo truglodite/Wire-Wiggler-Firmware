@@ -19,12 +19,13 @@ enum _control_mode {
 
 struct _control{
     float input;           // Motor Position feedback in deg
-    float input_prv;       // Previous position, used for speed calculation
-    float speed;           // Motor rotation speed in deg/s (calculated each loop)
+    float input_prv;       // T-1 Motor Position feedback in deg
+    float speed;           // Motor Rotation speed in deg/s
     float setpoint;        // Position set point in deg
     float setpoint_speed;  // Speed set point in deg/s
-    uint16_t load;         // Motor Load in mA (hardware stub, always 0)
-    double p, i, d;        // PID gains (read/write via CR/CW commands, not yet applied)
+    uint16_t load;         // Motor Load in mA
+    double u;              // Control signal range 0-255
+    double p, i, d;        // Control gains
 };
 
 #ifndef POLARIZER
@@ -35,7 +36,7 @@ struct _control{
         bool homing_flag;                             // Homing flag
         bool parking_flag;                            // Parking flag
         int8_t inside_temperature;                    // Inside Temperature
-        float park_az, park_el;                        // Park position for both axis
+        double park_az, park_el;                      // Park position for both axis
         uint8_t fault_az, fault_el;                   // Motor drivers fault flag
         bool switch_eleMin, switch_aziMin;            // End-stop values
     };
@@ -54,14 +55,14 @@ struct _control{
 #endif
 
 _control control_az = { .input = 0.0, .input_prv = 0.0, .speed=0.0, .setpoint = 0.0,
-                        .setpoint_speed = 0.0, .load = 0, .p = 8.0,
+                        .setpoint_speed = 0.0, .load = 0, .u = 0.0, .p = 8.0,
                         .i = 0.0, .d = 0.5 };
 _control control_el = { .input = 0.0, .input_prv = 0.0, .speed=0.0, .setpoint = 0.0,
-                        .setpoint_speed = 0.0, .load = 0, .p = 10.0,
+                        .setpoint_speed = 0.0, .load = 0, .u = 0.0, .p = 10.0,
                         .i = 0.0, .d = 0.3 };
 #ifdef POLARIZER
     _control control_po = { .input = 0.0, .input_prv = 0.0, .speed=0.0, .setpoint = 0.0,
-                        .setpoint_speed = 0.0, .load = 0, .p = 10.0,
+                        .setpoint_speed = 0.0, .load = 0, .u = 0.0, .p = 10.0,
                         .i = 0.0, .d = 0.3 };
 
     _rotator rotator = { .rotator_status = idle, .rotator_error = no_error,

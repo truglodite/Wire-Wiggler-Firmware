@@ -10,6 +10,7 @@ Easycomm is compatible with the "satnogs" type device found in most rotator apps
 #define LIBRARIES_EASYCOMM_H_
 
 #include <Arduino.h>
+#include <WString.h>
 #include <avr/wdt.h>
 #include "globals.h"
 
@@ -23,12 +24,13 @@ public:
     }
 
     void easycomm_proc() {
-        static char buffer[BUFFER_SIZE];
+        char buffer[BUFFER_SIZE];
         char incomingByte;
         char *Data = buffer;
         char *rawData;
         static uint16_t BufferIndex = 0;
         char data[100];
+        String str1, str2, str3, str4, str5, str6;
 
         // Block if serial buffer has data
         while (Serial.available() > 0) {
@@ -42,21 +44,26 @@ public:
                     if (buffer[2] == ' ' && buffer[3] == 'E' &&
                         buffer[4] == 'L') {
                         // Send current absolute position in deg
-                        printAzEl();
+                        str1 = String("AZ");
+                        str2 = String(control_az.input, 1);
+                        str3 = String(" EL");
+                        str4 = String(control_el.input, 1);
+                        str5 = String("\n");
+                        Serial.print(str1 + str2 + str3 + str4 + str5);
                     } else {
                         // Get the absolute position in deg for azimuth
                         rotator.control_mode = position;
                         rawData = strtok_r(Data, " ", &Data);
                         strncpy(data, rawData + 2, 10);
                         if (isNumber(data)) {
-                            control_az.setpoint = constrain(atof(data), AZI_MIN_ANGLE, AZI_MAX_ANGLE);
+                            control_az.setpoint = atof(data);
                         }
                         // Get the absolute position in deg for elevation
                         rawData = strtok_r(Data, " ", &Data);
                         if (rawData[0] == 'E' && rawData[1] == 'L') {
                             strncpy(data, rawData + 2, 10);
                             if (isNumber(data)) {
-                                control_el.setpoint = constrain(atof(data), ELE_MIN_ANGLE, ELE_MAX_ANGLE);
+                                control_el.setpoint = atof(data);
                             }
                         }
                     }
@@ -67,7 +74,7 @@ public:
                         if (rawData[0] == 'E' && rawData[1] == 'L') {
                             strncpy(data, rawData + 2, 10);
                             if (isNumber(data)) {
-                                control_el.setpoint = constrain(atof(data), ELE_MIN_ANGLE, ELE_MAX_ANGLE);
+                                control_el.setpoint = atof(data);
                             }
                         }
                 } else if (buffer[0] == 'V' && buffer[1] == 'U') {
@@ -107,135 +114,173 @@ public:
                            buffer[4] == 'E') {
                     // Stop Moving
                     rotator.control_mode = position;
-                    printAzEl();
+                    str1 = String("AZ");
+                    str2 = String(control_az.input, 1);
+                    str3 = String(" EL");
+                    str4 = String(control_el.input, 1);
+                    str5 = String("\n");
+                    Serial.print(str1 + str2 + str3 + str4 + str5);
                     control_az.setpoint = control_az.input;
                     control_el.setpoint = control_el.input;
                 } else if (buffer[0] == 'R' && buffer[1] == 'E' &&
                            buffer[2] == 'S' && buffer[3] == 'E' &&
                            buffer[4] == 'T') {
                     // Reset the rotator, go to home position
-                    printAzEl();
+                    str1 = String("AZ");
+                    str2 = String(control_az.input, 1);
+                    str3 = String(" EL");
+                    str4 = String(control_el.input, 1);
+                    str5 = String("\n");
+                    Serial.print(str1 + str2 + str3 + str4 + str5);
                     rotator.homing_flag = false;
                 } else if (buffer[0] == 'P' && buffer[1] == 'A' &&
                            buffer[2] == 'R' && buffer[3] == 'K' ) {
                     // Park the rotator
                     rotator.control_mode = position;
-                    printAzEl();
+                    str1 = String("AZ");
+                    str2 = String(control_az.input, 1);
+                    str3 = String(" EL");
+                    str4 = String(control_el.input, 1);
+                    str5 = String("\n");
+                    Serial.print(str1 + str2 + str3 + str4 + str5);
                     rotator.parking_flag = false;
                 } else if (buffer[0] == 'V' && buffer[1] == 'E') {
-                    // Get the version of rotator controller
-                    Serial.print("VESatNOGS-v2.2\n");
+                    // Get the version if rotator controller
+                    str1 = String("VE");
+                    str2 = String("SatNOGS-v2.2");
+                    str3 = String("\n");
+                    Serial.print(str1 + str2 + str3);
                 } else if (buffer[0] == 'I' && buffer[1] == 'P' &&
                            buffer[2] == '0') {
                     // Get the inside temperature
-                    Serial.print("IP0,");
-                    Serial.print(rotator.inside_temperature, DEC);
-                    Serial.print('\n');
+                    str1 = String("IP0,");
+                    str2 = String(rotator.inside_temperature, DEC);
+                    str3 = String("\n");
+                    Serial.print(str1 + str2 + str3);
                 } else if (buffer[0] == 'I' && buffer[1] == 'P' &&
                            buffer[2] == '1') {
                     // Get the status of end-stop, azimuth
-                    Serial.print("IP1,");
-                    Serial.print(rotator.switch_eleMin, DEC);
-                    Serial.print('\n');
+                    str1 = String("IP1,");
+                    str2 = String(rotator.switch_eleMin, DEC);
+                    str3 = String("\n");
+                    Serial.print(str1 + str2 + str3);
                 } else if (buffer[0] == 'I' && buffer[1] == 'P' &&
                            buffer[2] == '2') {
                     // Get the status of end-stop, elevation
-                    Serial.print("IP2,");
-                    Serial.print(rotator.switch_aziMin, DEC);
-                    Serial.print('\n');
+                    str1 = String("IP2,");
+                    str2 = String(rotator.switch_aziMin, DEC);
+                    str3 = String("\n");
+                    Serial.print(str1 + str2 + str3);
                 } else if (buffer[0] == 'I' && buffer[1] == 'P' &&
                            buffer[2] == '3') {
                     // Get the current position of azimuth in deg
-                    Serial.print("IP3,");
-                    Serial.print(control_az.input, 2);
-                    Serial.print('\n');
+                    str1 = String("IP3,");
+                    str2 = String(control_az.input, 2);
+                    str3 = String("\n");
+                    Serial.print(str1 + str2 + str3);
                 } else if (buffer[0] == 'I' && buffer[1] == 'P' &&
                            buffer[2] == '4') {
                     // Get the current position of elevation in deg
-                    Serial.print("IP4,");
-                    Serial.print(control_el.input, 2);
-                    Serial.print('\n');
+                    str1 = String("IP4,");
+                    str2 = String(control_el.input, 2);
+                    str3 = String("\n");
+                    Serial.print(str1 + str2 + str3);
                 } else if (buffer[0] == 'I' && buffer[1] == 'P' &&
                            buffer[2] == '5') {
                     // Get the load of azimuth, in range of 0-1023
-                    Serial.print("IP5,");
-                    Serial.print(control_az.load, DEC);
-                    Serial.print('\n');
+                    str1 = String("IP5,");
+                    str2 = String(control_az.load, DEC);
+                    str3 = String("\n");
+                    Serial.print(str1 + str2 + str3);
                 } else if (buffer[0] == 'I' && buffer[1] == 'P' &&
                            buffer[2] == '6') {
                     // Get the load of elevation, in range of 0-1023
-                    Serial.print("IP6,");
-                    Serial.print(control_el.load, DEC);
-                    Serial.print('\n');
+                    str1 = String("IP6,");
+                    str2 = String(control_el.load, DEC);
+                    str3 = String("\n");
+                    Serial.print(str1 + str2 + str3);
                 } else if (buffer[0] == 'I' && buffer[1] == 'P' &&
                            buffer[2] == '7') {
                     // Get the speed of azimuth in deg/s
-                    Serial.print("IP7,");
-                    Serial.print(control_az.speed, 2);
-                    Serial.print('\n');
+                    str1 = String("IP7,");
+                    str2 = String(control_az.speed, 2);
+                    str3 = String("\n");
+                    Serial.print(str1 + str2 + str3);
                 } else if (buffer[0] == 'I' && buffer[1] == 'P' &&
                            buffer[2] == '8') {
                     // Get the speed of elevation in deg/s
-                    Serial.print("IP8,");
-                    Serial.print(control_el.speed, 2);
-                    Serial.print('\n');
+                    str1 = String("IP8,");
+                    str2 = String(control_el.speed, 2);
+                    str3 = String("\n");
+                    Serial.print(str1 + str2 + str3);
                 } else if (buffer[0] == 'G' && buffer[1] == 'S') {
                     // Get the status of rotator
-                    Serial.print("GS");
-                    Serial.print(rotator.rotator_status, DEC);
-                    Serial.print('\n');
+                    str1 = String("GS");
+                    str2 = String(rotator.rotator_status, DEC);
+                    str3 = String("\n");
+                    Serial.print(str1 + str2 + str3);
                 } else if (buffer[0] == 'G' && buffer[1] == 'E') {
                     // Get the error of rotator
-                    Serial.print("GE");
-                    Serial.print(rotator.rotator_error, DEC);
-                    Serial.print('\n');
+                    str1 = String("GE");
+                    str2 = String(rotator.rotator_error, DEC);
+                    str3 = String("\n");
+                    Serial.print(str1 + str2 + str3);
                 } else if(buffer[0] == 'C' && buffer[1] == 'R') {
                     // Get Configuration of rotator
                     if (buffer[3] == '1') {
                         // Get Kp Azimuth gain
-                        Serial.print("1,");
-                        Serial.print(control_az.p, 2);
-                        Serial.print('\n');
+                        str1 = String("1,");
+                        str2 = String(control_az.p, 2);
+                        str3 = String("\n");
+                        Serial.print(str1 + str2 + str3);
                     } else if (buffer[3] == '2') {
                         // Get Ki Azimuth gain
-                        Serial.print("2,");
-                        Serial.print(control_az.i, 2);
-                        Serial.print('\n');
+                        str1 = String("2,");
+                         str2 = String(control_az.i, 2);
+                         str3 = String("\n");
+                         Serial.print(str1 + str2 + str3);
                     } else if (buffer[3] == '3') {
                         // Get Kd Azimuth gain
-                        Serial.print("3,");
-                        Serial.print(control_az.d, 2);
-                        Serial.print('\n');
+                        str1 = String("3,");
+                        str2 = String(control_az.d, 2);
+                        str3 = String("\n");
+                        Serial.print(str1 + str2 + str3);
                     } else if (buffer[3] == '4') {
                         // Get Kp Elevation gain
-                        Serial.print("4,");
-                        Serial.print(control_el.p, 2);
-                        Serial.print('\n');
+                        str1 = String("4,");
+                         str2 = String(control_el.p, 2);
+                         str3 = String("\n");
+                         Serial.print(str1 + str2 + str3);
                     } else if (buffer[3] == '5') {
                         // Get Ki Elevation gain
-                        Serial.print("5,");
-                        Serial.print(control_el.i, 2);
-                        Serial.print('\n');
+                        str1 = String("5,");
+                        str2 = String(control_el.i, 2);
+                        str3 = String("\n");
+                        Serial.print(str1 + str2 + str3);
                     } else if (buffer[3] == '6') {
                         // Get Kd Elevation gain
-                        Serial.print("6,");
-                        Serial.print(control_el.d, 2);
-                        Serial.print('\n');
+                        str1 = String("6,");
+                        str2 = String(control_el.d, 2);
+                        str3 = String("\n");
+                        Serial.print(str1 + str2 + str3);
                     } else if (buffer[3] == '7') {
                         // Get Azimuth park position
-                        Serial.print("7,");
-                        Serial.print(rotator.park_az, 2);
-                        Serial.print('\n');
+                        str1 = String("7,");
+                        str2 = String(rotator.park_az, 2);
+                        str3 = String("\n");
+                        Serial.print(str1 + str2 + str3);
                     } else if (buffer[3] == '8') {
                         // Get Elevation park position
-                        Serial.print("8,");
-                        Serial.print(rotator.park_el, 2);
-                        Serial.print('\n');
+                        str1 = String("8,");
+                        str2 = String(rotator.park_el, 2);
+                        str3 = String("\n");
+                        Serial.print(str1 + str2 + str3);
                     } else if (buffer[3] == '9') {
                         // Get control mode
-                        Serial.print("9,");
-                        Serial.print(rotator.control_mode);
-                        Serial.print('\n');
+                        str1 = String("9,");
+                        str2 = String(rotator.control_mode);
+                        str3 = String("\n");
+                        Serial.print(str1 + str2 + str3);
                     }
                 } else if (buffer[0] == 'C' && buffer[1] == 'W') {
                     // Set Config
@@ -305,32 +350,20 @@ public:
                     wdt_enable(WDTO_2S);
                     while(1);
                 }
-                // Reset the buffer and clean the serial buffer
+                // Reset the buffer an clean the serial buffer
                 BufferIndex = 0;
                 // Block while sending serial data
                 Serial.flush();
             }
             // Store oldest serial byte in buffer var
             else {
-                if (BufferIndex < BUFFER_SIZE - 1) {
-                    buffer[BufferIndex] = incomingByte;
-                    BufferIndex++;
-                } else {
-                    BufferIndex = 0;
-                }
+                buffer[BufferIndex] = incomingByte;
+                BufferIndex++;
             }
         }
     }
 
 private:
-    void printAzEl() {
-        Serial.print("AZ");
-        Serial.print(control_az.input, 1);
-        Serial.print(" EL");
-        Serial.print(control_el.input, 1);
-        Serial.print('\n');
-    }
-
     bool isNumber(char *input) {
         for (uint16_t i = 0; input[i] != '\0'; i++) {
             if (isalpha(input[i]))

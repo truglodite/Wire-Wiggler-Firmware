@@ -25,26 +25,14 @@
 //#define POL_POT_HYSTERESIS  1     // Increase to eliminate polarize axis shaking while poti is not moved
 //#define POL_POT_SAMPLES   4       // Size of array -1 to store rolling average samples
 
+// Uncomment to enable 5883 compass feedback feature
+//#define COMPASS
+
+// Uncomment to enable mpu6050 IMU feedback feature
+//#define IMU_FEEDBACK
 
 // Uncomment to enable parking feature... not yet implemented!
 //#define PARKING
-
-// IMU feedback for moving vehicle/boat satellite tracking.
-// Enable the feature, then select one IMU device and one magnetometer device.
-// Mount sensor with X→bow, Y→starboard, Z→down.
-//#define IMU_FEEDBACK
-// --- IMU device (pick one) ---
-//#define IMU_DEVICE_ICM20948      // SparkFun Qwiic ICM-20948 accel/gyro (addr 0x69 default)
-//#define IMU_DEVICE_MPU6050       // InvenSense MPU-6050 accel/gyro (addr 0x68 default)
-// --- Magnetometer device (pick one) ---
-//#define MAG_DEVICE_AK09916       // AK09916 (integrated in ICM-20948, read via I2C master)
-//#define MAG_DEVICE_HMC5883L      // Honeywell HMC5883L (read via IMU I2C master, addr 0x1E)
-// --- Optional address overrides ---
-//#define ICM20948_ADDR   0x68     // Uncomment if ICM-20948 AD0 is pulled low (default 0x69)
-//#define MPU6050_ADDR    0x69     // Uncomment if MPU-6050 AD0 is pulled high (default 0x68)
-//#define IMU_DECLINATION  0.0     // Magnetic declination degrees (+ East, - West). Find at ngdc.noaa.gov/geomag
-//#define IMU_BETA         0.033   // Madgwick beta: lower=smoother (waves), higher=faster (turning). Range 0.01-0.1
-//#define IMU_UPDATE_HZ    50      // IMU sample rate Hz (10-100)
 
 // Uncomment and move debug led to troubled spot
 //#define DEBUG                   

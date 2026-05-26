@@ -41,6 +41,18 @@
     #endif
 #endif
 
+#if defined(COMPASS) || defined(IMU_FEEDBACK) // compass and imu require i2c
+    #include <Wire.h>
+#endif
+
+#ifdef COMPASS
+    #include <Adafruit_HMC5883_U.h>
+#endif
+
+#ifdef IMU_FEEDBACK
+    #include <Adafruit_MPU6050.h>
+    #include <Adafruit_Sensor.h>
+#endif
 
 #ifndef BAUDRATE
     #define BAUDRATE           57600 // Set the Baudrate of easycomm 3 protocol (57600)
@@ -129,6 +141,9 @@
 #ifndef HOME_DELAY
     #define HOME_DELAY         1000  // millis to keep moving after hitting all endstops while homing
 #endif
+#ifndef SAMPLE_TIME
+    #define SAMPLE_TIME        0.1   // Control loop in sec
+#endif
 
 // Check if step rates are too high (>4000) ????
 //#if defined(SPR) && (AZI_VMAX * AZI_RATIO * SPR * AZI_MICROSTEP / 360 > 4000)
@@ -144,40 +159,5 @@
 #ifndef TEENSY_UNO_CNC_SHIELD_V_3
     #ifdef WATCHDOG
         #include <../lib/watchdog.h>
-    #endif
-#endif
-
-#include <../lib/rotator_math.h>
-
-#ifdef IMU_FEEDBACK
-    #ifndef IMU_DECLINATION
-        #define IMU_DECLINATION  0.0f
-    #endif
-    #ifndef IMU_BETA
-        #define IMU_BETA         0.033f
-    #endif
-    #ifndef IMU_UPDATE_HZ
-        #define IMU_UPDATE_HZ    50
-    #endif
-    // Require at least one IMU and one mag device to be selected
-    #if !defined(IMU_DEVICE_ICM20948) && !defined(IMU_DEVICE_MPU6050)
-        #error "IMU_FEEDBACK enabled but no IMU device defined. Define IMU_DEVICE_ICM20948 or IMU_DEVICE_MPU6050 in config.h"
-    #endif
-    #if !defined(MAG_DEVICE_AK09916) && !defined(MAG_DEVICE_HMC5883L)
-        #error "IMU_FEEDBACK enabled but no magnetometer device defined. Define MAG_DEVICE_AK09916 or MAG_DEVICE_HMC5883L in config.h"
-    #endif
-    #include <Wire.h>
-    #include <../lib/imu.h>
-    #ifdef MAG_DEVICE_AK09916
-        #include <../lib/ak09916.h>
-    #endif
-    #ifdef MAG_DEVICE_HMC5883L
-        #include <../lib/hmc5883l.h>
-    #endif
-    #ifdef IMU_DEVICE_ICM20948
-        #include <../lib/icm20948.h>
-    #endif
-    #ifdef IMU_DEVICE_MPU6050
-        #include <../lib/mpu6050.h>
     #endif
 #endif
